@@ -1,0 +1,21 @@
+# Cyber Defense System Configuration
+system:
+  name: "Adaptive Deception-Mesh"
+  version: "2.1.4"
+  mode: "AUTOMATIC"
+  
+network:
+  grid_size: 16
+  max_honeypots: 5
+  topology: "MESH"
+  bandwidth_threshold: 80
+  
+security:
+  threat_level: "NORMAL"
+  auto_response: true
+  log_retention: 30  # days
+  
+ai:
+  detection_models: ["xgboost", "isolation_forest", "autoencoder"]
+  training_interval: 24  # hours
+  confidence_threshold: 0.85

@@ -1,0 +1,33 @@
+data:
+  raw_path: "data/raw/UNSW_NB15_training-set.csv"
+  processed_path: "data/processed/"
+  test_size: 0.3
+  random_state: 42
+
+model:
+  ml_models:
+    - random_forest
+    - logistic_regression
+    - xgboost
+  clustering:
+    n_clusters: 5
+  reinforcement:
+    learning_rate: 0.1
+    discount_factor: 0.9
+    epsilon: 0.1
+    episodes: 1000
+
+network:
+  nodes: 10
+  max_honeypots: 3
+  resources:
+    cpu_min: 1
+    cpu_max: 4
+    ram_min: 2
+    ram_max: 16
+    bandwidth_min: 100
+    bandwidth_max: 1000
+
+evaluation:
+  metrics: ["accuracy", "precision", "recall", "f1"]
+  k_folds: 5
