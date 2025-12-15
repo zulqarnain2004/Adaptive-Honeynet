@@ -1,0 +1,147 @@
+# Security Configuration
+
+# Authentication
+authentication:
+  enabled: false  # Set to true for production
+  method: jwt  # jwt, basic, oauth2
+  
+  jwt:
+    secret: adaptive-deception-mesh-jwt-secret-2023
+    algorithm: HS256
+    access_token_expiry: 3600  # 1 hour
+    refresh_token_expiry: 2592000  # 30 days
+    
+  users:
+    - username: admin
+      password_hash: $2b$12$...  # bcrypt hash
+      role: administrator
+      permissions:
+        - read
+        - write
+        - execute
+        - admin
+        
+    - username: analyst
+      password_hash: $2b$12$...
+      role: security_analyst
+      permissions:
+        - read
+        - write
+        
+    - username: viewer
+      password_hash: $2b$12$...
+      role: viewer
+      permissions:
+        - read
+
+# Authorization
+authorization:
+  role_based: true
+  permission_matrix:
+    administrator:
+      - models: [create, read, update, delete, train]
+      - data: [create, read, update, delete, import, export]
+      - network: [configure, monitor, control]
+      - system: [restart, shutdown, update]
+      
+    security_analyst:
+      - models: [read, train]
+      - data: [read, import]
+      - network: [monitor]
+      - system: []
+      
+    viewer:
+      - models: [read]
+      - data: [read]
+      - network: [monitor]
+      - system: []
+
+# Rate Limiting
+rate_limiting:
+  enabled: true
+  strategies:
+    ip_based:
+      requests_per_minute: 100
+      burst_limit: 150
+      
+    token_based:
+      requests_per_minute: 1000
+      burst_limit: 1500
+      
+  storage: memory  # memory, redis
+  block_duration: 300  # 5 minutes
+
+# Input Validation
+input_validation:
+  enabled: true
+  
+  network_data:
+    ip_address: true
+    port_range: true
+    packet_size: true
+    protocol: true
+    
+  ml_input:
+    feature_range: true
+    data_type: true
+    missing_values: true
+    
+  api_requests:
+    schema_validation: true
+    size_limit: 1048576  # 1MB
+    content_type: ['application/json']
+
+# Security Headers
+security_headers:
+  enabled: true
+  headers:
+    X-Content-Type-Options: nosniff
+    X-Frame-Options: DENY
+    X-XSS-Protection: 1; mode=block
+    Strict-Transport-Security: max-age=31536000; includeSubDomains
+    Content-Security-Policy: "default-src 'self'"
+    Referrer-Policy: strict-origin-when-cross-origin
+
+# Encryption
+encryption:
+  data_at_rest:
+    enabled: false
+    algorithm: AES-256-GCM
+    
+  data_in_transit:
+    enabled: false  # Enable with HTTPS
+    ssl_cert: certs/certificate.pem
+    ssl_key: certs/private.key
+    
+  passwords:
+    algorithm: bcrypt
+    rounds: 12
+
+# Audit Logging
+audit_logging:
+  enabled: true
+  events:
+    - authentication
+    - authorization
+    - data_access
+    - configuration_changes
+    - model_training
+    - attack_detection
+    
+  storage:
+    format: json
+    directory: logs/audit
+    retention_days: 90
+    compression: true
+
+# Threat Intelligence
+threat_intelligence:
+  enabled: true
+  sources:
+    - abuseipdb
+    - virustotal
+    - alienvault
+    - emergingthreats
+    
+  update_interval: 3600  # 1 hour
+  cache_duration: 86400  # 24 hours

@@ -1,0 +1,222 @@
+# Monitoring Configuration
+
+# Health Checks
+health_checks:
+  enabled: true
+  interval: 30  # seconds
+  
+  checks:
+    api:
+      endpoint: /health
+      timeout: 5
+      expected_status: 200
+      
+    database:
+      type: sqlite
+      file: data/adaptive_mesh.db
+      timeout: 2
+      
+    models:
+      check_loaded: true
+      timeout: 10
+      
+    network_simulator:
+      check_running: true
+      timeout: 3
+      
+    disk_space:
+      path: .
+      threshold: 0.9  # 90%
+      
+    memory:
+      threshold: 0.85  # 85%
+
+# Metrics Collection
+metrics:
+  enabled: true
+  port: 9090  # Prometheus port
+  path: /metrics
+  interval: 15  # seconds
+  
+  system_metrics:
+    cpu: true
+    memory: true
+    disk: true
+    network: true
+    
+  application_metrics:
+    requests: true
+    response_time: true
+    errors: true
+    active_users: true
+    
+  business_metrics:
+    attacks_detected: true
+    false_positives: true
+    detection_accuracy: true
+    honeypot_efficiency: true
+    rl_reward: true
+
+# Alerting
+alerting:
+  enabled: true
+  
+  channels:
+    email:
+      enabled: false
+      smtp_host: smtp.gmail.com
+      smtp_port: 587
+      username: ''
+      password: ''
+      from_address: alerts@adaptive-mesh.local
+      to_addresses:
+        - admin@adaptive-mesh.local
+        
+    slack:
+      enabled: false
+      webhook_url: ''
+      channel: '#alerts'
+      
+    webhook:
+      enabled: false
+      url: ''
+      headers:
+        Content-Type: application/json
+
+  thresholds:
+    critical:
+      cpu_usage: 95
+      memory_usage: 90
+      disk_usage: 95
+      response_time: 5.0
+      error_rate: 0.1
+      detection_accuracy: 0.6
+      
+    warning:
+      cpu_usage: 80
+      memory_usage: 75
+      disk_usage: 85
+      response_time: 2.0
+      error_rate: 0.05
+      detection_accuracy: 0.7
+
+# Performance Monitoring
+performance:
+  enabled: true
+  
+  endpoints:
+    - path: /api/v1/detect
+      method: POST
+      threshold: 1.0  # seconds
+      
+    - path: /api/v1/simulation/start
+      method: POST
+      threshold: 2.0
+      
+    - path: /api/v1/network/topology
+      method: GET
+      threshold: 0.5
+      
+  slow_query_threshold: 1.0  # seconds
+  memory_leak_threshold: 0.1  # MB/s
+
+# Dashboard
+dashboard:
+  enabled: true
+  port: 8050  # Streamlit/Plotly Dash port
+  refresh_interval: 5  # seconds
+  
+  panels:
+    system_status:
+      enabled: true
+      metrics:
+        - cpu_usage
+        - memory_usage
+        - disk_usage
+        - active_connections
+        
+    attack_monitor:
+      enabled: true
+      metrics:
+        - attacks_detected
+        - attack_types
+        - detection_rate
+        - false_positives
+        
+    ml_performance:
+      enabled: true
+      metrics:
+        - model_accuracy
+        - precision
+        - recall
+        - f1_score
+        
+    rl_agent:
+      enabled: true
+      metrics:
+        - reward
+        - epsilon
+        - q_values
+        - actions_taken
+        
+    network_topology:
+      enabled: true
+      refresh_interval: 10
+
+# Log Monitoring
+log_monitoring:
+  enabled: true
+  patterns:
+    error: 'ERROR|CRITICAL|FATAL'
+    warning: 'WARNING'
+    security: 'authentication|authorization|intrusion'
+    performance: 'slow|timeout|latency'
+    
+  alert_on:
+    - error_rate > 0.05
+    - security_events > 10
+    - performance_issues > 5
+
+# Reporting
+reporting:
+  enabled: true
+  
+  schedules:
+    daily:
+      enabled: true
+      time: '23:00'
+      metrics:
+        - total_attacks
+        - detection_accuracy
+        - false_positives
+        - system_uptime
+        
+    weekly:
+      enabled: true
+      day: 'sunday'
+      time: '22:00'
+      metrics:
+        - attack_trends
+        - model_performance
+        - resource_utilization
+        - security_incidents
+        
+    monthly:
+      enabled: true
+      day: 1
+      time: '21:00'
+      metrics:
+        - system_reliability
+        - cost_analysis
+        - improvement_metrics
+        - recommendations
+  
+  formats:
+    - html
+    - pdf
+    - csv
+    
+  delivery:
+    email: true
+    file: true
+    webhook: false
