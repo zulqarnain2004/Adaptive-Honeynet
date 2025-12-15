@@ -1,9 +1,7 @@
 """
-Data module for dataset handling and preprocessing
+API module for Adaptive Deception Mesh
 """
 
-from .dataset_loader import DatasetLoader
-from .preprocessor import DataPreprocessor
-from .data_validator import DataValidator
+from .routes import api
 
-__all__ = ['DatasetLoader', 'DataPreprocessor', 'DataValidator']
+__all__ = ['api']
