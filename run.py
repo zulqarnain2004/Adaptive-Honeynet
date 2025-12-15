@@ -1,116 +1,85 @@
 #!/usr/bin/env python3
 """
-Adaptive Deception-Mesh Runner
-Complete project execution script with enhanced UI
+Simple runner for Adaptive Deception Mesh
 """
-
-import argparse
-import sys
 import os
-import subprocess
-import webbrowser
+import sys
 import time
-from datetime import datetime
-import json
+import webbrowser
+import threading
 
-def check_streamlit_version():
-    """Check and display Streamlit version"""
+def start_everything():
+    print("="*70)
+    print("Adaptive Deception Mesh - All-in-One Starter")
+    print("="*70)
+    
+    # Check requirements
     try:
-        result = subprocess.run([sys.executable, "-m", "streamlit", "--version"], 
-                              capture_output=True, text=True)
-        if result.returncode == 0:
-            version_line = result.stdout.strip()
-            print(f"📦 Streamlit Version: {version_line}")
-            
-            # Extract version number
-            import re
-            version_match = re.search(r'(\d+\.\d+\.\d+)', version_line)
-            if version_match:
-                version = version_match.group(1)
-                major, minor, patch = map(int, version.split('.'))
+        import flask
+        import rich
+        print("✓ Requirements check passed")
+    except ImportError:
+        print("✗ Missing requirements. Installing...")
+        os.system("pip install -r requirements.txt")
+    
+    # Create directories
+    directories = ['models/saved_models', 'data', 'logs', 'mlflow_tracking', 'configs']
+    for directory in directories:
+        os.makedirs(directory, exist_ok=True)
+        print(f"✓ Created directory: {directory}")
+    
+    # Start server in background thread
+    def start_server():
+        from app import create_app
+        app = create_app()
+        
+        ports = [5000, 5001, 5002]
+        for port in ports:
+            try:
+                print(f"\n🌐 Starting server on port {port}...")
+                app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False, threaded=True)
+                break
+            except Exception as e:
+                if port == ports[-1]:
+                    print(f"❌ All ports failed: {e}")
+    
+    server_thread = threading.Thread(target=start_server, daemon=True)
+    server_thread.start()
+    
+    # Wait for server to start
+    print("\n⏳ Waiting for server to start...")
+    import requests
+    
+    for i in range(30):
+        try:
+            response = requests.get("http://localhost:5000/health", timeout=1)
+            if response.status_code == 200:
+                print("✅ Server is running!")
                 
-                if major >= 1 and minor >= 12:
-                    print("✅ Streamlit version is compatible with icon parameter")
-                else:
-                    print("⚠️  Streamlit version may not support icon parameter")
-                    print("   Consider upgrading: pip install --upgrade streamlit>=1.12.0")
-            return True
-        else:
-            print("❌ Streamlit not found or error checking version")
-            return False
-    except Exception as e:
-        print(f"❌ Error checking Streamlit version: {e}")
-        return False
-
-# ... [rest of the run.py code remains the same as previous version] ...
-
-def run_dashboard():
-    """Run the interactive dashboard"""
-    print_step(1, "Starting Interactive Dashboard", "processing")
-    
-    # Check Streamlit version
-    if not check_streamlit_version():
-        print(f"   {Color.YELLOW}⚠{Color.ENDC} Streamlit version check failed")
-        print(f"   {Color.YELLOW}   Installing latest Streamlit...{Color.ENDC}")
-        try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "--upgrade", "streamlit>=1.12.0"])
-            print(f"   {Color.GREEN}✓{Color.ENDC} Streamlit updated successfully")
+                # Open browser
+                time.sleep(1)
+                webbrowser.open("http://localhost:5000")
+                
+                # Start CLI
+                print("\n" + "="*70)
+                print("Starting CLI interface...")
+                print("="*70)
+                time.sleep(2)
+                
+                from cli import cli
+                cli()
+                break
         except:
-            print(f"   {Color.RED}✗{Color.ENDC} Failed to update Streamlit")
+            if i % 5 == 0:
+                print(f"  Waiting... ({i+1}/30)")
+            time.sleep(1)
     
-    # Display dashboard info
-    dashboard_info = f"""
-{Color.CYAN}┌────────────────────────────────────────────────────────────┐{Color.ENDC}
-{Color.CYAN}│{Color.ENDC} {Color.BOLD}🌐 DASHBOARD INFORMATION:{Color.ENDC}                              {Color.CYAN}│{Color.ENDC}
-{Color.CYAN}├────────────────────────────────────────────────────────────┤{Color.ENDC}
-{Color.CYAN}│{Color.ENDC} {Color.BOLD}URL:{Color.ENDC} http://localhost:8501                           {Color.CYAN}│{Color.ENDC}
-{Color.CYAN}│{Color.ENDC} {Color.BOLD}Status:{Color.ENDC} Starting...                                  {Color.CYAN}│{Color.ENDC}
-{Color.CYAN}│{Color.ENDC} {Color.BOLD}Auto-open:{Color.ENDC} Enabled                                   {Color.CYAN}│{Color.ENDC}
-{Color.CYAN}│{Color.ENDC} {Color.BOLD}Stop:{Color.ENDC} Press Ctrl+C                                   {Color.CYAN}│{Color.ENDC}
-{Color.CYAN}└────────────────────────────────────────────────────────────┘{Color.ENDC}
-    """
-    print(dashboard_info)
-    
-    # Open browser
+    # Keep alive
     try:
-        print(f"   {Color.GREEN}✓{Color.ENDC} Opening browser...")
-        webbrowser.open("http://localhost:8501")
-        time.sleep(1)
-    except:
-        print(f"   {Color.YELLOW}⚠{Color.ENDC} Could not open browser automatically")
-        print(f"   {Color.YELLOW}   Please open: http://localhost:8501 manually{Color.ENDC}")
-    
-    # Start Streamlit with simplified command
-    print(f"\n{Color.CYAN}Starting Streamlit server...{Color.ENDC}")
-    print(f"{Color.YELLOW}Dashboard is now running. Press Ctrl+C to stop.{Color.ENDC}")
-    
-    try:
-        # Simplified command for compatibility
-        cmd = [
-            sys.executable, "-m", "streamlit", "run", "dashboard.py",
-            "--server.port=8501", "--server.address=0.0.0.0"
-        ]
-        
-        # Try to add theme parameters if supported
-        try:
-            # Check if theme parameters are supported
-            test_cmd = [sys.executable, "-m", "streamlit", "run", "--help"]
-            result = subprocess.run(test_cmd, capture_output=True, text=True)
-            if "--theme.primaryColor" in result.stdout:
-                cmd.extend(["--theme.primaryColor=#3949ab"])
-                cmd.extend(["--theme.backgroundColor=#0f172a"])
-                cmd.extend(["--theme.secondaryBackgroundColor=#1e293b"])
-                cmd.extend(["--theme.textColor=#f8fafc"])
-        except:
-            pass  # Ignore if theme parameters not supported
-        
-        subprocess.run(cmd)
-        return True
+        server_thread.join()
     except KeyboardInterrupt:
-        print(f"\n{Color.YELLOW}Dashboard stopped by user{Color.ENDC}")
-        return True
-    except Exception as e:
-        print(f"{Color.RED}✗ Dashboard error: {e}{Color.ENDC}")
-        return False
+        print("\n👋 Goodbye!")
+        sys.exit(0)
 
-# ... [rest of the file remains the same] ...
+if __name__ == "__main__":
+    start_everything()
