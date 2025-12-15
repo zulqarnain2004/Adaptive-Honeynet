@@ -1,0 +1,52 @@
+# Database Configuration
+type: sqlite  # sqlite, postgresql, mysql
+path: data/adaptive_mesh.db  # For SQLite
+
+# Connection Pool
+pool:
+  size: 10
+  max_overflow: 20
+  timeout: 30
+  recycle: 3600
+
+# PostgreSQL Configuration (if using)
+postgresql:
+  host: localhost
+  port: 5432
+  database: adaptive_mesh
+  username: postgres
+  password: postgres
+  ssl: false
+
+# MySQL Configuration (if using)
+mysql:
+  host: localhost
+  port: 3306
+  database: adaptive_mesh
+  username: root
+  password: root
+  charset: utf8mb4
+
+# MongoDB Configuration (if using)
+mongodb:
+  uri: mongodb://localhost:27017/
+  database: adaptive_mesh
+  collections:
+    attacks: attacks
+    logs: system_logs
+    models: ml_models
+
+# Redis Configuration (for caching)
+redis:
+  enabled: false
+  host: localhost
+  port: 6379
+  db: 0
+  password: ""
+  cache_ttl: 300  # 5 minutes
+
+# Migration Configuration
+migrations:
+  enabled: true
+  directory: migrations
+  auto_migrate: true

@@ -1,0 +1,138 @@
+# Logging Configuration
+
+# Log Levels
+levels:
+  root: INFO
+  app: INFO
+  api: INFO
+  models: DEBUG
+  database: WARNING
+  security: INFO
+  
+# Log Handlers
+handlers:
+  console:
+    enabled: true
+    level: INFO
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+    
+  file:
+    enabled: true
+    level: DEBUG
+    filename: logs/app.log
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(pathname)s:%(lineno)d'
+    max_size: 10485760  # 10MB
+    backup_count: 5
+    encoding: utf-8
+    
+  json_file:
+    enabled: true
+    level: INFO
+    filename: logs/structured.log
+    format: json
+    max_size: 5242880  # 5MB
+    backup_count: 3
+    
+  error_file:
+    enabled: true
+    level: ERROR
+    filename: logs/error.log
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(exc_info)s'
+    max_size: 5242880
+    backup_count: 5
+
+# Log Categories
+categories:
+  application:
+    name: adaptive_deception_mesh
+    handlers: [console, file, json_file]
+    
+  api:
+    name: api
+    handlers: [console, file, json_file]
+    
+  database:
+    name: database
+    handlers: [file]
+    
+  security:
+    name: security
+    handlers: [console, file, error_file]
+    
+  performance:
+    name: performance
+    handlers: [json_file]
+    
+  audit:
+    name: audit
+    handlers: [json_file, file]
+    level: INFO
+
+# Log Formatting
+formats:
+  default: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  detailed: '%(asctime)s - %(name)s - %(levelname)s - %(message)s - %(pathname)s:%(lineno)d'
+  json: '{"timestamp": "%(asctime)s", "logger": "%(name)s", "level": "%(levelname)s", "message": "%(message)s", "module": "%(module)s", "function": "%(funcName)s", "line": "%(lineno)d"}'
+
+# Log Rotation
+rotation:
+  strategy: size  # size, time
+  max_size: 10485760  # 10MB
+  interval: 1  # days for time-based
+  backup_count: 5
+  compression: true
+  encoding: utf-8
+
+# Log Filtering
+filters:
+  sensitive_data:
+    enabled: true
+    patterns:
+      - password
+      - token
+      - secret
+      - key
+    replacement: '[REDACTED]'
+    
+  duplicate_messages:
+    enabled: true
+    window: 60  # seconds
+    max_duplicates: 5
+
+# Performance Logging
+performance:
+  enabled: true
+  metrics:
+    - request_duration
+    - memory_usage
+    - cpu_usage
+    - database_query_time
+    - model_inference_time
+    
+  interval: 60  # seconds
+  thresholds:
+    request_duration: 2.0  # seconds
+    memory_usage: 0.8  # 80%
+    cpu_usage: 0.9  # 90%
+
+# External Logging
+external:
+  syslog:
+    enabled: false
+    host: localhost
+    port: 514
+    facility: local7
+    
+  elasticsearch:
+    enabled: false
+    hosts:
+      - http://localhost:9200
+    index: adaptive-mesh-logs
+    buffer_size: 1000
+    
+  slack:
+    enabled: false
+    webhook_url: ''
+    channel: '#alerts'
+    level: ERROR

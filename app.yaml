@@ -1,0 +1,61 @@
+# Application Configuration
+debug: true
+environment: development
+host: 0.0.0.0
+port: 5000
+secret_key: adaptive-deception-mesh-secret-key-2023
+name: Adaptive Deception Mesh
+version: 1.0.0
+
+# CORS Configuration
+cors:
+  enabled: true
+  origins:
+    - http://localhost:3000
+    - http://127.0.0.1:3000
+    - http://localhost:5000
+  methods:
+    - GET
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+  allow_headers:
+    - Content-Type
+    - Authorization
+    - X-Requested-With
+
+# Session Configuration
+session:
+  type: filesystem
+  lifetime: 3600  # 1 hour in seconds
+  secure: false
+  http_only: true
+
+# API Configuration
+api:
+  prefix: /api/v1
+  version: v1
+  title: Adaptive Deception Mesh API
+  description: Intelligent Honeynet with Learning and Adaptation
+  contact:
+    name: CS351 Project Team
+    email: cs351-project@giki.edu.pk
+  license:
+    name: Academic License
+    url: https://www.giki.edu.pk
+
+# Rate Limiting
+rate_limiting:
+  enabled: true
+  default: 100  # requests per minute
+  strategies:
+    ip_based: true
+    token_based: false
+  storage: memory  # or redis
+
+# Error Handling
+error_handling:
+  show_details: true  # Show error details in development
+  log_errors: true
+  email_errors: false

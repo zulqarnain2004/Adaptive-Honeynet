@@ -1,0 +1,109 @@
+# Machine Learning Configuration
+
+# Model Training
+training:
+  train_test_split: 0.7
+  random_state: 42
+  cv_folds: 5
+  scoring: accuracy
+  n_jobs: -1
+
+# Model Parameters
+models:
+  random_forest:
+    n_estimators: 100
+    max_depth: 20
+    min_samples_split: 2
+    min_samples_leaf: 1
+    n_jobs: -1
+    random_state: 42
+    
+  logistic_regression:
+    max_iter: 1000
+    C: 1.0
+    penalty: l2
+    solver: lbfgs
+    random_state: 42
+    
+  kmeans:
+    n_clusters: 4
+    init: k-means++
+    max_iter: 300
+    random_state: 42
+    
+  xgboost:
+    n_estimators: 100
+    max_depth: 6
+    learning_rate: 0.1
+    objective: binary:logistic
+    random_state: 42
+
+# Feature Engineering
+features:
+  # From screenshot feature importance
+  important_features:
+    - Packet Rate
+    - Port Diversity
+    - SNAP Network
+    - Payload Rate
+    - Protocol Type
+    - Time Release
+  
+  preprocessing:
+    scale: true
+    normalize: true
+    handle_missing: true
+    encode_categorical: true
+    
+  selection:
+    method: importance  # importance, correlation, pca
+    threshold: 0.01
+    n_features: 20
+
+# Dataset Configuration
+datasets:
+  unswnb15:
+    path: data/unswnb15_data.csv
+    url: https://www.unsw.adfa.edu.au/unsw-canberra-cyber/cybersecurity/ADFA-NB15-Datasets/
+    description: UNSW-NB15 network traffic dataset
+    attack_categories:
+      Normal: 0.45
+      PortScan: 0.25
+      DoS: 0.18
+      Exploits: 0.12
+      
+  cicids2017:
+    path: data/cicids2017_data.csv
+    url: https://www.unb.ca/cic/datasets/ids-2017.html
+    description: CICIDS2017 intrusion detection dataset
+    
+  cowrie:
+    path: data/cowrie_logs.csv
+    url: https://github.com/cowrie/cowrie
+    description: Cowrie honeypot logs
+
+# Evaluation Metrics
+metrics:
+  classification:
+    - accuracy
+    - precision
+    - recall
+    - f1_score
+    - roc_auc
+    
+  clustering:
+    - silhouette_score
+    - davies_bouldin_score
+    - calinski_harabasz_score
+    
+  regression:
+    - mse
+    - mae
+    - r2_score
+
+# Model Storage
+storage:
+  directory: models/saved_models
+  format: joblib  # joblib, pickle, h5
+  versioning: true
+  backup: true
